@@ -1,0 +1,7 @@
+D:\Programming Projects\BarcodeLib\bin\Debug\BarcodeLib.exe.config
+D:\Programming Projects\BarcodeLib\bin\Debug\BarcodeLib.exe
+D:\Programming Projects\BarcodeLib\bin\Debug\BarcodeLib.pdb
+D:\Programming Projects\BarcodeLib\obj\Debug\BarcodeLib.csproj.AssemblyReference.cache
+D:\Programming Projects\BarcodeLib\obj\Debug\BarcodeLib.csproj.CoreCompileInputs.cache
+D:\Programming Projects\BarcodeLib\obj\Debug\BarcodeLib.exe
+D:\Programming Projects\BarcodeLib\obj\Debug\BarcodeLib.pdb

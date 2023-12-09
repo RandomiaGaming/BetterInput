@@ -1,0 +1,7 @@
+D:\Programming Projects\BarcodeLib\bin\Debug\BetterInput.exe.config
+D:\Programming Projects\BarcodeLib\bin\Debug\BetterInput.exe
+D:\Programming Projects\BarcodeLib\bin\Debug\BetterInput.pdb
+D:\Programming Projects\BarcodeLib\obj\Debug\BetterInput.csproj.AssemblyReference.cache
+D:\Programming Projects\BarcodeLib\obj\Debug\BetterInput.csproj.CoreCompileInputs.cache
+D:\Programming Projects\BarcodeLib\obj\Debug\BetterInput.exe
+D:\Programming Projects\BarcodeLib\obj\Debug\BetterInput.pdb
