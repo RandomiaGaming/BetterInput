@@ -1,4 +1,8 @@
 ﻿//Helpers
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System;
+
 public static partial class RawInputHelper
 {
     #region Event Delegates
@@ -48,47 +52,78 @@ public static partial class RawInputHelper
     //Registers a window handle to recieve raw input keyboard events.
     public static void RegisterRawKeyboardInput(System.IntPtr hwndTarget)
     {
-        RawInputDevice rawInputDevice = new RawInputDevice();
+        RawInputDevice[] rawInputDevices = new RawInputDevice[1];
 
         RawInputDevice.HIDTargetInfo hidTargetInfo = RawInputDevice.GetHIDTargetInfo(RawInputDevice.HIDTarget.Keyboard);
 
-        rawInputDevice.UsagePage = hidTargetInfo.UsagePage;
-        rawInputDevice.Usage = hidTargetInfo.Usage;
-        rawInputDevice.Flags = RawInputDevice.Flags_NoLegacy;
-        rawInputDevice.hwndTarget = hwndTarget;
+        rawInputDevices[0].UsagePage = hidTargetInfo.UsagePage;
+        rawInputDevices[0].Usage = hidTargetInfo.Usage;
+        rawInputDevices[0].Flags = RawInputDevice.Flags_NoLegacy;
+        rawInputDevices[0].hwndTarget = hwndTarget;
 
-        System.IntPtr rawInputDevicesPtr = System.Runtime.InteropServices.Marshal.AllocHGlobal(RawInputDevice.SizeOf);
-
-        System.Runtime.InteropServices.Marshal.StructureToPtr(rawInputDevice, rawInputDevicesPtr, true);
-
-        bool result = RegisterRawInputDevices(rawInputDevicesPtr, 1, (uint)RawInputDevice.SizeOf);
-
-        if (result is false)
+        if (!RegisterRawInputDevices(rawInputDevices, 1, (uint)RawInputDevice.SizeOf))
         {
-            System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+            int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            throw new System.ComponentModel.Win32Exception(error);
         }
     }
     //Returns true if the message was a raw input keyboard event else false.
-    public static bool ProcessRawKeyboardMessage(ref System.Windows.Forms.Message m, RawKeyboardEvent callback)
+    public static unsafe bool ProcessRawKeyboardMessage(ref System.Windows.Forms.Message m, RawKeyboardEvent callback)
     {
         if (m.Msg is 0x00FF /*WM_INPUT*/)
         {
             uint size = 0;
-            uint statusCode1 = GetRawInputData(m.LParam, GetRawInputData_uiCommand_Input, System.IntPtr.Zero, ref size, (uint)RawInputHeader.SizeOf);
+            uint result = GetRawInputData(m.LParam, GetRawInputData_uiCommand_Input, System.IntPtr.Zero, ref size, (uint)RawInputHeader.SizeOf);
 
-            System.IntPtr dataPtr = System.Runtime.InteropServices.Marshal.AllocHGlobal((int)size);
-            uint statusCode2 = GetRawInputData(m.LParam, GetRawInputData_uiCommand_Input, dataPtr, ref size, (uint)RawInputHeader.SizeOf);
-
-            RawInputHeader header = System.Runtime.InteropServices.Marshal.PtrToStructure<RawInputHeader>(dataPtr);
-
-            if (header.Type == RawInputHeader.Type_Keyboard)
+            if (result == uint.MaxValue)
             {
-                RawKeyboard inputPayload = System.Runtime.InteropServices.Marshal.PtrToStructure<RawKeyboard>(dataPtr + RawInputHeader.SizeOf);
-
-                callback?.Invoke(header, inputPayload);
-
-                return true;
+                int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                if (error != 0)
+                {
+                    throw new System.ComponentModel.Win32Exception(error);
+                }
             }
+
+            byte[] data = new byte[size];
+
+            fixed (byte* dataPtr = data)
+            {
+                result = GetRawInputData(m.LParam, GetRawInputData_uiCommand_Input, (System.IntPtr)(*dataPtr), ref size, (uint)RawInputHeader.SizeOf);
+            }
+
+            if (result != size)
+            {
+                int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                if (error != 0)
+                {
+                    throw new System.ComponentModel.Win32Exception(error);
+                }
+            }
+
+
+
+
+
+            /* uint bytesRead = 0;
+             void* data = stackalloc byte[(int)size];
+
+             bytesRead = GetRawInputData(m.LParam, GetRawInputData_uiCommand_Input, data, &size, (uint)RawInputHeader.SizeOf);
+
+             if (bytesRead != size)
+             {
+                 throw new System.Exception("What");
+             }
+
+             RawInputHeader header = System.Runtime.InteropServices.Marshal.PtrToStructure<RawInputHeader>((System.IntPtr)data);
+
+             if (header.Type == RawInputHeader.Type_Keyboard)
+             {
+                 RawKeyboard inputPayload = System.Runtime.InteropServices.Marshal.PtrToStructure<RawKeyboard>(dataPtr + RawInputHeader.SizeOf);
+
+                 callback?.Invoke(header, inputPayload);
+
+            return true;
+            }*/
         }
 
         return false;

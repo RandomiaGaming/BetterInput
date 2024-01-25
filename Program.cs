@@ -1,4 +1,6 @@
-﻿namespace BetterInputExample
+﻿using System;
+
+namespace BetterInputExample
 {
     public static class Program
     {

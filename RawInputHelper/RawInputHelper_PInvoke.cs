@@ -1,4 +1,6 @@
 ﻿//PInvoke
+using System.Runtime.InteropServices;
+
 public static partial class RawInputHelper
 {
     #region GetRawInputData
@@ -23,7 +25,7 @@ public static partial class RawInputHelper
     //Return: True if the function succeeds; otherwise, false. If the function fails, call GetLastError for more information.
     [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterRawInputDevices(
-        System.IntPtr rawInputDevices, //An array of RawInputDevice structures that represent the devices that supply the raw input.
+        [MarshalAs(UnmanagedType.LPArray)] RawInputDevice[] rawInputDevices, //An array of RawInputDevice structures that represent the devices that supply the raw input.
         uint uiNumDevices, //The number of RawInputDevice structures pointed to by rawInputDevices.
         uint cbSize //The size, in bytes, of a RawInputDevice structure.
         );
